@@ -67,11 +67,17 @@ struct Sidebar: View {
             // Platz für die Ampel-Knöpfe des Fensters
             Color.clear.frame(height: 44)
 
-            Text("GimmeTheVerse")
-                .font(Theme.serif(17, .medium))
-                .foregroundStyle(Theme.ink)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 18)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("GimmeTheVerse")
+                    .font(Theme.serif(17, .medium))
+                    .foregroundStyle(Theme.ink)
+                Text("Die Bibel zu deinem Tag.")
+                    .font(Theme.serif(12.5))
+                    .italic()
+                    .foregroundStyle(Theme.inkSoft)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 18)
 
             SidebarRow(selected: route == .compose, action: { route = .compose }) {
                 rowLabel("Neuer Eintrag", systemImage: "square.and.pencil")
@@ -105,6 +111,18 @@ struct Sidebar: View {
                 .scrollIndicators(.never)
             }
             Spacer(minLength: 0)
+
+            HStack(spacing: 6) {
+                Image(systemName: "lock")
+                    .font(.system(size: 9.5, weight: .medium))
+                Text("Bleibt auf diesem Mac")
+                    .font(.system(size: 10.5))
+            }
+            .foregroundStyle(Theme.inkFaint)
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+            .padding(.bottom, 16)
+            .help("Alles läuft lokal über Ollama. Deine Einträge werden nur in ~/Library/Application Support/GimmeTheVerse gespeichert.")
         }
         .frame(maxHeight: .infinity, alignment: .top)
         .background(Theme.paperDeep)

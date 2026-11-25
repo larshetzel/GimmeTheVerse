@@ -18,7 +18,7 @@ struct ComposeView: View {
                 .foregroundStyle(Theme.ink)
                 .padding(.bottom, 6)
 
-            Text("Schreib es so auf, wie es dir auf dem Herzen liegt. Es bleibt auf diesem Mac.")
+            Text("Schreib es so auf, wie es dir auf dem Herzen liegt.")
                 .font(Theme.serif(15))
                 .italic()
                 .foregroundStyle(Theme.inkSoft)
