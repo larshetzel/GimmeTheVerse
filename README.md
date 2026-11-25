@@ -6,7 +6,6 @@ A private, German-language macOS app that connects what is on your mind with rel
 
 ## Highlights
 
-- Relevant passages from **Schlachter 1951**, with optional support for a separately licensed **Hoffnung für alle** import
 - 48 curated life situations combined with semantic search across 31,170 verses
 - Verse text always comes directly from the local database, never from the language model
 - Conversation history and favorite verses stored only on your Mac
