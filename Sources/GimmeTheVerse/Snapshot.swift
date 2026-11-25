@@ -5,10 +5,11 @@ import SwiftUI
 /// Schickt das Anliegen durch die echte Pipeline (mit temporärem Journal) und speichert
 /// die Oberfläche offscreen als PNG in Hell und Dunkel – ohne Bildschirmaufnahme-Rechte.
 enum Snapshot {
-    static var request: (dir: URL, text: String)? {
+    /// `--snapshot <ordner> "<anliegen>" ["<chat-nachricht>"]`
+    static var request: (dir: URL, text: String, chat: String?)? {
         let args = CommandLine.arguments
         guard let i = args.firstIndex(of: "--snapshot"), args.count > i + 2 else { return nil }
-        return (URL(fileURLWithPath: args[i + 1]), args[i + 2])
+        return (URL(fileURLWithPath: args[i + 1]), args[i + 2], args.count > i + 3 ? args[i + 3] : nil)
     }
 
     static var journalURL: URL {
@@ -16,11 +17,10 @@ enum Snapshot {
     }
 
     @MainActor
-    static func run(engine: Engine, dir: URL, text: String) {
+    static func run(engine: Engine, dir: URL, text: String, chat: String? = nil) {
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        let size = NSSize(width: 900, height: 900)
-
-        func render(_ name: String, route: Route, dark: Bool) {
+        func render(_ name: String, route: Route, dark: Bool, height: CGFloat = 900) {
+            let size = NSSize(width: 900, height: height)
             let root = ContentView(route: route)
                 .environment(engine)
                 .environment(engine.journal)
@@ -53,6 +53,20 @@ enum Snapshot {
             }
             render("entry-light.png", route: .entry(id), dark: false)
             render("entry-dark.png", route: .entry(id), dark: true)
+
+            if let chat {
+                engine.send(chat, to: id)
+                while engine.chatting.contains(id) {
+                    try? await Task.sleep(for: .milliseconds(300))
+                }
+                for m in engine.journal.entry(id)?.messages ?? [] {
+                    print("[\(m.role.rawValue)] \(m.content)")
+                    for p in m.passages { print("   → \(engine.bible.reference(p)): \(engine.bible.text(p))") }
+                }
+                // hoch genug, dass Zuspruch und Gespräch ganz zu sehen sind
+                render("chat-light.png", route: .entry(id), dark: false, height: 2600)
+                render("chat-dark.png", route: .entry(id), dark: true, height: 2600)
+            }
             exit(0)
         }
     }

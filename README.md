@@ -11,6 +11,8 @@ Kleine, lokale macOS-App: Du schreibst auf, was dich bewegt, also Sorgen, Ängst
 3. **Auswahl** (LLM): wählt 4 Stellen aus maximal 32 Kandidaten. Im Prompt stehen nur Stellenangabe und Anfang, denn der Prefill ist der Engpass.
 4. **Zuspruch** (LLM, gestreamt): 3–5 Sätze in der Du-Form, warm und seelsorgerlich.
 
+Danach kannst du unter dem Zuspruch **weiterreden**. Der Chat kennt dein Anliegen, die Verse und den Zuspruch. Nennt das Modell eine neue Stelle als `[[Psalm 23,4]]`, zeigt die App den Schlachter-Text wortgetreu in der Antwort an, nicht auflösbare Stellen fallen weg. Das Gespräch wird mit dem Eintrag gespeichert.
+
 Die angezeigten Verstexte kommen **immer wortgetreu aus der Datenbank**. Das Modell wählt nur Nummern aus und erzeugt nie selbst Bibeltext.
 
 Warum der Lebenslagen-Index? Die reine Embedding-Suche fand kaum die Verse, die ein Seelsorger nennen würde. Die Schlachter sagt „Leidtragende“ und „zürnen“, wo man heute „Trauer“ und „Wut“ schreibt. Mit dem Index enthält der Kandidatenpool die klassischen Stellen. Das Messskript dazu ist `tools/eval.py`.
@@ -64,7 +66,8 @@ Neue Lebenslage oder Stelle: `tools/themes.json` bearbeiten, dann `tools/build_i
 | `BibleStore.swift` | Verse, Abschnitte, Lebenslagen, Embeddings und Prior; Vektorsuche (Accelerate), Kandidatenpool |
 | `Ollama.swift` | Embed, Chat mit JSON (Structured Outputs oder Fallback), gestreamter Chat |
 | `Engine.swift` | Pipeline, Prompts, Krisenerkennung |
-| `Snapshot.swift` | `--snapshot`-Modus für Screenshots |
+| `ChatView.swift` | Gespräch unter dem Zuspruch (Blasen, Eingabe, eingeblendete Verse) |
+| `Snapshot.swift` | `--snapshot <ordner> "<anliegen>" ["<chat>"]` für Screenshots |
 | `Journal.swift` | Verlauf und Favoriten, Persistenz |
 | `Theme.swift` | Farben (Papier, Tinte, Ochsenblut), Typografie (New York Serif) |
 | `*View.swift` | Oberfläche (eigene Seitenleiste statt NavigationSplitView, damit unter macOS 26 kein Liquid-Glass-Panel entsteht) |

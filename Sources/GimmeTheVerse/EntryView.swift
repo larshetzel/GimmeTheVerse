@@ -10,6 +10,7 @@ struct EntryView: View {
 
     var body: some View {
         if let entry = journal.entry(id) {
+            ScrollViewReader { scroller in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     header(entry)
@@ -26,6 +27,9 @@ struct EntryView: View {
                         }
                         .transition(.opacity)
                         comfort(entry)
+                        if entry.status == .done {
+                            ChatSection(entry: entry)
+                        }
                     }
 
                     if entry.status == .failed {
@@ -38,9 +42,21 @@ struct EntryView: View {
                 .frame(maxWidth: 720, alignment: .leading)
                 .frame(maxWidth: .infinity)
                 .animation(.easeOut(duration: 0.35), value: entry.passages)
+                Color.clear.frame(height: 1).id(Self.bottom)
+            }
+            // Während eine Antwort entsteht, unten mitlaufen
+            .onChange(of: entry.messages.last?.content) {
+                guard engine.chatting.contains(id) else { return }
+                withAnimation(.easeOut(duration: 0.2)) { scroller.scrollTo(Self.bottom, anchor: .bottom) }
+            }
+            .onChange(of: entry.messages.count) {
+                withAnimation(.easeOut(duration: 0.25)) { scroller.scrollTo(Self.bottom, anchor: .bottom) }
+            }
             }
         }
     }
+
+    private static let bottom = "entry-bottom"
 
     private func header(_ entry: Entry) -> some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -120,6 +136,7 @@ struct VerseView: View {
     @Environment(Engine.self) private var engine
     @Environment(Journal.self) private var journal
     let passage: Passage
+    var size: CGFloat = 20
     @State private var hovering = false
     @State private var showContext = false
 
@@ -152,7 +169,7 @@ struct VerseView: View {
                 contextText
             } else {
                 Text(bible.text(passage))
-                    .font(Theme.serif(20))
+                    .font(Theme.serif(size))
                     .foregroundStyle(Theme.ink)
                     .lineSpacing(6)
                     .textSelection(.enabled)
@@ -173,7 +190,7 @@ struct VerseView: View {
             return (num + body).foregroundColor(passage.indices.contains(i) ? Theme.ink : Theme.inkFaint)
         }
         return parts.reduce(Text(""), +)
-            .font(Theme.serif(18))
+            .font(Theme.serif(size - 2))
             .lineSpacing(6)
             .textSelection(.enabled)
             .fixedSize(horizontal: false, vertical: true)

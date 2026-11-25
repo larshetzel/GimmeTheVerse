@@ -36,6 +36,8 @@ final class BibleStore: @unchecked Sendable {
     let themes: [Theme]
     private let vectors: [Float]  // verses.count x dim, L2-normalisiert
     private let prior: [Float]    // je Vers: wie sehr er zuspricht (z-normalisiert)
+    private let lookup: [Int: Int]  // (Buch, Kapitel, Vers) → Index
+    private let bookKeys: [String: Int]  // normalisierter Buchname/Alias → Buch
 
     init() throws {
         books = try JSONDecoder().decode([String].self, from: Data(contentsOf: Self.resource("books.json")))
@@ -54,6 +56,17 @@ final class BibleStore: @unchecked Sendable {
         let priorData = try Data(contentsOf: Self.resource("prior.f32"))
         precondition(priorData.count == verses.count * 4, "prior.f32 passt nicht zu verses.json")
         prior = priorData.withUnsafeBytes { Array($0.bindMemory(to: Float.self)) }
+
+        var lookup = [Int: Int](minimumCapacity: verses.count)
+        for (i, v) in verses.enumerated() { lookup[Self.key(v.book, v.chapter, v.verse)] = i }
+        self.lookup = lookup
+
+        var keys = [String: Int]()
+        for (i, name) in books.enumerated() { keys[Self.normalize(name)] = i }
+        for (alias, name) in Self.aliases {
+            if let i = books.firstIndex(of: name) { keys[Self.normalize(alias)] = i }
+        }
+        bookKeys = keys
     }
 
     /// Sucht Ressourcen im App-Bundle, beim Entwickeln (`swift run`) im Repo-Ordner.
@@ -62,6 +75,44 @@ final class BibleStore: @unchecked Sendable {
         let repo = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
         return repo.appendingPathComponent("Resources").appendingPathComponent(name)
+    }
+
+    // MARK: - Stellenangaben
+
+    private static func key(_ book: Int, _ chapter: Int, _ verse: Int) -> Int { book * 1_000_000 + chapter * 1000 + verse }
+
+    private static func normalize(_ name: String) -> String {
+        name.lowercased().filter { $0.isLetter || $0.isNumber }
+    }
+
+    /// Gängige Abkürzungen und andere Namen, wie ein Sprachmodell sie schreiben könnte.
+    private static let aliases: [String: String] = [
+        "Genesis": "1. Mose", "Exodus": "2. Mose", "Levitikus": "3. Mose", "Numeri": "4. Mose", "Deuteronomium": "5. Mose",
+        "Psalmen": "Psalm", "Ps": "Psalm", "Spr": "Sprüche", "Sprichwörter": "Sprüche", "Kohelet": "Prediger",
+        "Pred": "Prediger", "Hoheslied": "Hohelied", "Jes": "Jesaja", "Jer": "Jeremia", "Klgl": "Klagelieder",
+        "Ezechiel": "Hesekiel", "Hes": "Hesekiel", "Mt": "Matthäus", "Matth": "Matthäus", "Mk": "Markus",
+        "Lk": "Lukas", "Joh": "Johannes", "Apg": "Apostelgeschichte", "Röm": "Römer", "Gal": "Galater",
+        "Eph": "Epheser", "Phil": "Philipper", "Kol": "Kolosser", "Hebr": "Hebräer", "Hiob": "Hiob", "Ijob": "Hiob",
+        "Jak": "Jakobus", "Offb": "Offenbarung", "Offenbarung des Johannes": "Offenbarung",
+        "1 Kor": "1. Korinther", "2 Kor": "2. Korinther", "1 Petr": "1. Petrus", "2 Petr": "2. Petrus",
+        "1 Joh": "1. Johannes", "1 Thess": "1. Thessalonicher", "2 Thess": "2. Thessalonicher",
+        "1 Tim": "1. Timotheus", "2 Tim": "2. Timotheus", "1 Sam": "1. Samuel", "2 Sam": "2. Samuel",
+        "1 Kön": "1. Könige", "2 Kön": "2. Könige", "1 Chr": "1. Chronik", "2 Chr": "2. Chronik",
+        "1 Mo": "1. Mose", "2 Mo": "2. Mose", "3 Mo": "3. Mose", "4 Mo": "4. Mose", "5 Mo": "5. Mose",
+    ]
+
+    private static let refPattern = #/^\s*(.+?)\s+(\d+)\s*[,:]\s*(\d+)(?:\s*[-\x{2013}]\s*(\d+))?\s*$/#
+
+    /// "Psalm 23,4", "Phil 4:6-7", "1. Mose 28,15" → Abschnitt; nil, wenn es die Stelle nicht gibt.
+    func parseReference(_ ref: String) -> Passage? {
+        guard let m = ref.wholeMatch(of: Self.refPattern),
+              let book = bookKeys[Self.normalize(String(m.1))],
+              let chapter = Int(m.2), let v1 = Int(m.3) else { return nil }
+        let v2 = m.4.flatMap { Int($0) } ?? v1
+        guard v2 >= v1, v2 - v1 < 8,
+              let a = lookup[Self.key(book, chapter, v1)],
+              let b = lookup[Self.key(book, chapter, v2)] else { return nil }
+        return Passage(a, b)
     }
 
     // MARK: - Text

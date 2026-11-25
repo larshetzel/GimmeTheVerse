@@ -80,6 +80,12 @@ struct Ollama: Sendable {
 
     /// Chat mit gestreamter Antwort, liefert Text-Stücke.
     func chatStream(model: String, system: String, user: String, temperature: Double = 0.7) -> AsyncThrowingStream<String, Error> {
+        chatStream(model: model, messages: [["role": "system", "content": system], ["role": "user", "content": user]],
+                   temperature: temperature)
+    }
+
+    /// Gestreamter Chat mit beliebigem Verlauf ([["role": …, "content": …]]).
+    func chatStream(model: String, messages: [[String: String]], temperature: Double = 0.7) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
@@ -89,7 +95,7 @@ struct Ollama: Sendable {
                         "think": false,
                         "keep_alive": "30m",
                         "options": ["temperature": temperature, "num_ctx": Self.contextLength],
-                        "messages": [["role": "system", "content": system], ["role": "user", "content": user]],
+                        "messages": messages,
                     ])
                     let (bytes, response) = try await data(for: req)
                     try check(response)

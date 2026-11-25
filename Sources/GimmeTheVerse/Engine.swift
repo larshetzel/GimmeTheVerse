@@ -17,6 +17,8 @@ final class Engine {
     let bible: BibleStore
     let journal: Journal
     private let ollama = Ollama()
+    /// Einträge, in denen gerade eine Chat-Antwort entsteht.
+    private(set) var chatting = Set<UUID>()
 
     init(bible: BibleStore, journal: Journal) {
         self.bible = bible
@@ -40,6 +42,62 @@ final class Engine {
         journal.update(id) { $0 = Entry(id: e.id, date: e.date, text: e.text) }
         Task { await run(id, text: e.text) }
     }
+
+    // MARK: - Gespräch
+
+    func send(_ text: String, to id: UUID) {
+        let text = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty, !chatting.contains(id), let entry = journal.entry(id), entry.status == .done else { return }
+        let reply = ChatMessage(role: .assistant, content: "")
+        journal.update(id, save: true) {
+            $0.chat = $0.messages + [ChatMessage(role: .user, content: text), reply]
+            if Crisis.detect(text) { $0.crisis = true }
+        }
+        chatting.insert(id)
+        Task { await runChat(id, replyID: reply.id) }
+    }
+
+    private func runChat(_ id: UUID, replyID: UUID) async {
+        defer { chatting.remove(id) }
+        guard let entry = journal.entry(id) else { return }
+
+        // Kontext: Anliegen, Verse und Zuspruch wie im ersten Durchlauf, danach das bisherige Gespräch.
+        var messages: [[String: String]] = [
+            ["role": "system", "content": Prompts.chatSystem(crisis: entry.crisis)],
+            ["role": "user", "content": Prompts.comfortUser(text: entry.text, passages: entry.passages.map {
+                "\(bible.reference($0)): \(bible.text($0))"
+            })],
+            ["role": "assistant", "content": entry.zuspruch],
+        ]
+        let history = entry.messages.filter { $0.id != replyID && !$0.failed }.suffix(16)
+        messages += history.map { ["role": $0.role.rawValue, "content": $0.content] }
+
+        func updateReply(save: Bool = false, _ change: @escaping (inout ChatMessage) -> Void) {
+            journal.update(id, save: save) { e in
+                guard let i = e.chat?.firstIndex(where: { $0.id == replyID }) else { return }
+                change(&e.chat![i])
+            }
+        }
+
+        do {
+            for try await chunk in ollama.chatStream(model: Defaults.chatModel, messages: messages) {
+                updateReply { $0.content += chunk }
+            }
+            let content = journal.entry(id)?.messages.first { $0.id == replyID }?.content ?? ""
+            let passages = ChatText.references(in: content).compactMap(bible.parseReference)
+            updateReply(save: true) {
+                $0.content = $0.content.trimmingCharacters(in: .whitespacesAndNewlines)
+                $0.passages = Array(NSOrderedSet(array: passages).array as! [Passage]).prefix(3).map { $0 }
+            }
+        } catch {
+            updateReply(save: true) {
+                $0.failed = true
+                $0.content = error.localizedDescription
+            }
+        }
+    }
+
+    // MARK: - Erster Durchlauf
 
     private func run(_ id: UUID, text: String) async {
         let model = Defaults.chatModel
@@ -204,7 +262,57 @@ enum Prompts {
         return s
     }
 
+    static func chatSystem(crisis: Bool) -> String {
+        var s = """
+        Du bist ein einfühlsamer, erfahrener Seelsorger. Ein Mensch hat dir anvertraut, was ihn bewegt; er hat dazu Bibelstellen (Schlachter 1951) und einen ersten Zuspruch bekommen. Jetzt führt ihr ein Gespräch.
+
+        So antwortest du:
+        - Auf Deutsch, in der Du-Form, warm, ehrlich und in heutiger, schlichter Sprache.
+        - Kurz: meist 2 bis 5 Sätze, ein Absatz. Höchstens eine Rückfrage pro Antwort.
+        - Geh auf das ein, was er gerade schreibt. Nimm Gefühle ernst. Keine Predigt, keine Floskeln, keine Ratschläge von oben herab, keine Diagnosen.
+        - Beginne nicht mit "Es ist (völlig/absolut) verständlich", "Ich verstehe" oder "Ich kann verstehen" – fang direkt bei dem an, was er geschrieben hat.
+        - Bei medizinischen, rechtlichen oder seelischen Krisen ermutige behutsam, sich auch Hilfe bei Menschen oder Fachleuten zu holen.
+        - Keine Überschriften, keine Aufzählungen, keine Emojis.
+
+        Bibelstellen:
+        - Wenn ein weiterer Vers ihm jetzt wirklich hilft, nenne höchstens zwei Stellen pro Antwort, jeweils in doppelten eckigen Klammern, z. B. [[Psalm 23,4]] oder [[Philipper 4,6-7]]. Die App zeigt den Verstext dann wortgetreu an.
+        - Zitiere den Verstext dieser neuen Stellen nicht selbst und erfinde keine Stellen. Psalmen nach deutscher Zählung (z. B. Psalm 34,19).
+        - Auf Stellen, die schon gezeigt wurden, kannst du dich ohne Klammern beziehen.
+        """
+        if crisis {
+            s += """
+
+            WICHTIG: Der Mensch könnte in akuter Not sein. Sag ihm behutsam und deutlich, dass er damit nicht allein bleiben muss und sich jetzt Hilfe holen darf: bei der Telefonseelsorge (0800 111 0 111, kostenlos, rund um die Uhr) oder bei einem Menschen, dem er vertraut. Bei akuter Gefahr: Notruf 112.
+            """
+        }
+        return s
+    }
+
     static func comfortUser(text: String, passages: [String]) -> String {
         "Was mich bewegt:\n\(text)\n\nAusgewählte Bibelstellen:\n" + passages.map { "- \($0)" }.joined(separator: "\n")
+    }
+}
+
+/// [[Stelle]]-Marker in Chat-Antworten.
+enum ChatText {
+    private static let marker = #/\[\[([^\[\]]{3,40})\]\]/#
+
+    static func references(in text: String) -> [String] {
+        text.matches(of: marker).map { String($0.1) }
+    }
+
+    /// Anzeigetext: aufgelöste Marker werden zur sauberen Stellenangabe, nicht auflösbare fallen weg.
+    static func display(_ text: String, bible: BibleStore) -> String {
+        var out = text.replacing(marker) { m in
+            bible.parseReference(String(m.1)).map(bible.reference) ?? ""
+        }
+        // Halbe Marker während des Streamens ausblenden
+        if let open = out.range(of: "[[", options: .backwards), !out[open.upperBound...].contains("]]") {
+            out = String(out[..<open.lowerBound])
+        }
+        for (a, b) in [("  ", " "), (" .", "."), (" ,", ","), ("()", ""), ("( )", "")] {
+            out = out.replacingOccurrences(of: a, with: b)
+        }
+        return out.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

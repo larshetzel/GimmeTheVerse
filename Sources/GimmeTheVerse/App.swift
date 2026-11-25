@@ -54,7 +54,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         if let snap = Snapshot.request, case let .ready(engine) = AppState.shared {
-            Snapshot.run(engine: engine, dir: snap.dir, text: snap.text)
+            Snapshot.run(engine: engine, dir: snap.dir, text: snap.text, chat: snap.chat)
         }
     }
 }

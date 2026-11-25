@@ -11,6 +11,9 @@ enum Theme {
     static let rule = dynamic(light: 0xDCD2C0, dark: 0x37312A)
     static let accent = dynamic(light: 0x8B3A2B, dark: 0xD69276)
     static let notice = dynamic(light: 0xF1E2D3, dark: 0x2E241E)
+    /// Chat: eigene Nachrichten leicht ochsenblut-getönt, Antworten im Ton der Seitenleiste.
+    static let bubbleMine = dynamic(light: 0xEBDCCD, dark: 0x3A2B24)
+    static let bubbleTheirs = dynamic(light: 0xECE5D7, dark: 0x26231F)
 
     static func serif(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
         .system(size: size, weight: weight, design: .serif)

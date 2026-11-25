@@ -15,7 +15,10 @@ struct Entry: Codable, Identifiable, Equatable {
     var crisis = false
     var status: Status = .analysing
     var error: String?
+    /// Optional, damit ältere journal.json-Dateien ohne Chat weiter lesbar sind.
+    var chat: [ChatMessage]?
 
+    var messages: [ChatMessage] { chat ?? [] }
     var isWorking: Bool { [.analysing, .searching, .choosing, .writing].contains(status) }
 
     var title: String {
@@ -23,6 +26,18 @@ struct Entry: Codable, Identifiable, Equatable {
         let firstLine = text.split(whereSeparator: \.isNewline).first.map(String.init) ?? text
         return firstLine.count > 40 ? String(firstLine.prefix(40)) + "…" : firstLine
     }
+}
+
+struct ChatMessage: Codable, Identifiable, Equatable {
+    enum Role: String, Codable { case user, assistant }
+
+    var id = UUID()
+    var role: Role
+    /// Rohtext; Antworten enthalten Stellen als [[Psalm 23,4]].
+    var content: String
+    /// Aufgelöste Stellen aus den [[…]]-Markern – Text kommt immer aus der Bibel-Datenbank.
+    var passages: [Passage] = []
+    var failed = false
 }
 
 /// Verlauf und Lieblingsverse, lokal gespeichert in ~/Library/Application Support/GimmeTheVerse.
@@ -52,6 +67,8 @@ final class Journal {
         entries = stored.entries.map { e in
             var e = e
             if e.isWorking { e.status = .failed; e.error = "Abgebrochen." }
+            // Eine beim Beenden unvollständige Antwort aufräumen
+            if let last = e.chat?.last, last.role == .assistant, last.content.isEmpty { e.chat?.removeLast() }
             return e
         }
         favorites = stored.favorites
