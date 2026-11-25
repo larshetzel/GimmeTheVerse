@@ -1,0 +1,190 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#171512"/>
+      <stop offset="0.52" stop-color="#241B18"/>
+      <stop offset="1" stop-color="#42271F"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#D98D6C" stop-opacity=".34"/>
+      <stop offset=".5" stop-color="#A9523C" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#A9523C" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F0B393"/>
+      <stop offset="1" stop-color="#D57C5B"/>
+    </linearGradient>
+    <linearGradient id="screenFrame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#474440"/>
+      <stop offset=".45" stop-color="#171716"/>
+      <stop offset="1" stop-color="#080808"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2=".8" y2="1">
+      <stop offset="0" stop-color="#E8E2D9"/>
+      <stop offset=".32" stop-color="#AAA59E"/>
+      <stop offset=".68" stop-color="#D8D2CA"/>
+      <stop offset="1" stop-color="#77736E"/>
+    </linearGradient>
+    <linearGradient id="metalEdge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8B8781"/>
+      <stop offset="1" stop-color="#45423F"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".18"/>
+      <stop offset=".5" stop-color="#FFFFFF" stop-opacity=".025"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFCF7"/>
+      <stop offset="1" stop-color="#EDE5D8"/>
+    </linearGradient>
+    <pattern id="grid" width="72" height="72" patternUnits="userSpaceOnUse">
+      <path d="M72 0H0V72" fill="none" stroke="#F8E9DE" stroke-opacity=".045" stroke-width="1"/>
+      <circle cx="0" cy="0" r="2" fill="#F8E9DE" fill-opacity=".09"/>
+    </pattern>
+    <pattern id="keys" width="43" height="24" patternUnits="userSpaceOnUse" patternTransform="skewX(28)">
+      <rect x="3" y="3" width="33" height="14" rx="3" fill="#343230" stroke="#F1ECE5" stroke-opacity=".2"/>
+    </pattern>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="200%">
+      <feDropShadow dx="0" dy="32" stdDeviation="28" flood-color="#000" flood-opacity=".48"/>
+    </filter>
+    <filter id="softShadow" x="-40%" y="-40%" width="180%" height="200%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000" flood-opacity=".28"/>
+    </filter>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="15" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="blur"><feGaussianBlur stdDeviation="38"/></filter>
+    <clipPath id="screenClip"><rect width="550" height="382" rx="9"/></clipPath>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+  <ellipse cx="1480" cy="500" rx="650" ry="610" fill="url(#halo)"/>
+  <circle cx="1790" cy="120" r="210" fill="#D88262" opacity=".07" filter="url(#blur)"/>
+  <circle cx="830" cy="1060" r="280" fill="#A9523C" opacity=".08" filter="url(#blur)"/>
+
+  <g opacity=".2" filter="url(#glow)" transform="translate(1502 310)">
+    <rect x="-18" y="-142" width="36" height="284" rx="18" fill="#E9A687"/>
+    <rect x="-91" y="-63" width="182" height="36" rx="18" fill="#E9A687"/>
+  </g>
+  <g opacity=".28" transform="translate(1502 310)">
+    <rect x="-6" y="-130" width="12" height="260" rx="6" fill="#F4C0A5"/>
+    <rect x="-79" y="-51" width="158" height="12" rx="6" fill="#F4C0A5"/>
+  </g>
+
+  <g transform="translate(110 70)">
+    <rect width="58" height="58" rx="16" fill="#F5EFE5"/>
+    <text x="29" y="43" text-anchor="middle" font-family="Georgia,serif" font-size="50" font-weight="bold" fill="#914633">”</text>
+    <text x="76" y="38" font-family="-apple-system,Helvetica Neue,Arial,sans-serif" font-size="27" font-weight="650" fill="#F7F1E8">GimmeTheVerse</text>
+  </g>
+
+  <g transform="translate(110 158)">
+    <rect width="282" height="40" rx="20" fill="#FFFFFF" fill-opacity=".065" stroke="#F6D8C6" stroke-opacity=".18"/>
+    <circle cx="22" cy="20" r="5" fill="#E6A080"/>
+    <text x="39" y="26" font-family="-apple-system,Helvetica Neue,Arial,sans-serif" font-size="15" font-weight="650" letter-spacing="1.8" fill="#E8D8CC">OPEN SOURCE · MACOS</text>
+  </g>
+
+  <text x="106" y="306" font-family="-apple-system,Helvetica Neue,Arial,sans-serif" font-size="75" font-weight="800" letter-spacing="-2.5" fill="#F7F1E8">CHRISTLICHE</text>
+  <text x="103" y="414" font-family="-apple-system,Helvetica Neue,Arial,sans-serif" font-size="96" font-weight="850" letter-spacing="-4" fill="#F7F1E8">DEVELOPER</text>
+  <text x="101" y="532" font-family="-apple-system,Helvetica Neue,Arial,sans-serif" font-size="116" font-weight="850" letter-spacing="-5" fill="url(#accent)">GESUCHT.</text>
+
+  <text x="110" y="606" font-family="-apple-system,Helvetica Neue,Arial,sans-serif" font-size="27" font-weight="400" fill="#D7CBC0">
+    <tspan x="110" dy="0">Entwickle mit an einer App, die Menschen</tspan>
+    <tspan x="110" dy="40">mit Bibelversen und Zuspruch begleitet –</tspan>
+    <tspan x="110" dy="40">lokal, offen und mit echter Wirkung.</tspan>
+  </text>
+
+  <g transform="translate(110 752)" font-family="-apple-system,Helvetica Neue,Arial,sans-serif" font-size="15" font-weight="650" fill="#E6D9CF">
+    <g><rect width="114" height="42" rx="12" fill="#FFF" fill-opacity=".055" stroke="#FFF" stroke-opacity=".12"/><text x="57" y="27" text-anchor="middle">SWIFTUI</text></g>
+    <g transform="translate(126 0)"><rect width="108" height="42" rx="12" fill="#FFF" fill-opacity=".055" stroke="#FFF" stroke-opacity=".12"/><text x="54" y="27" text-anchor="middle">OLLAMA</text></g>
+    <g transform="translate(246 0)"><rect width="82" height="42" rx="12" fill="#FFF" fill-opacity=".055" stroke="#FFF" stroke-opacity=".12"/><text x="41" y="27" text-anchor="middle">RAG</text></g>
+    <g transform="translate(340 0)"><rect width="134" height="42" rx="12" fill="#FFF" fill-opacity=".055" stroke="#FFF" stroke-opacity=".12"/><text x="67" y="27" text-anchor="middle">UI / UX</text></g>
+  </g>
+
+  <g transform="translate(110 866)" filter="url(#softShadow)">
+    <rect width="698" height="116" rx="24" fill="#F5EFE5"/>
+    <text x="30" y="42" font-family="-apple-system,Helvetica Neue,Arial,sans-serif" font-size="14" font-weight="750" letter-spacing="2" fill="#914633">MACH MIT AUF GITHUB</text>
+    <text x="30" y="79" font-family="-apple-system,Helvetica Neue,Arial,sans-serif" font-size="24" font-weight="650" fill="#29241F">github.com/larshetzel/GimmeTheVerse</text>
+    <circle cx="650" cy="58" r="29" fill="#914633"/>
+    <path d="M637 58h24m-9-9 9 9-9 9" fill="none" stroke="#FFF9F2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="112" y="1030" font-family="-apple-system,Helvetica Neue,Arial,sans-serif" font-size="14" letter-spacing="1.3" fill="#A9998D">CODE · GLAUBE · MENSCHEN</text>
+
+  <ellipse cx="1370" cy="874" rx="455" ry="86" fill="#000" opacity=".34" filter="url(#blur)"/>
+
+  <g filter="url(#shadow)">
+    <path d="M1067 224Q1064 210 1081 212L1648 294Q1663 296 1663 313V771L1067 687Z" fill="url(#screenFrame)" stroke="#69635D" stroke-opacity=".55" stroke-width="3"/>
+    <path d="M1083 236L1645 316V752L1083 672Z" fill="#080808"/>
+    <circle cx="1367" cy="278" r="4" fill="#57534F"/>
+
+    <g transform="matrix(.94 .145 0 1 1105 268)" clip-path="url(#screenClip)">
+      <rect width="550" height="382" fill="#F7F3EC"/>
+      <rect width="132" height="382" fill="#EEE8DD"/>
+      <rect x="14" y="16" width="27" height="27" rx="8" fill="#914633"/>
+      <text x="27.5" y="38" text-anchor="middle" font-family="Georgia,serif" font-size="28" font-weight="bold" fill="#FFF9F2">”</text>
+      <text x="49" y="28" font-family="-apple-system,Arial,sans-serif" font-size="10.5" font-weight="700" fill="#29241F">GimmeTheVerse</text>
+      <text x="49" y="40" font-family="-apple-system,Arial,sans-serif" font-size="6.5" fill="#71675C">Die Bibel zu deinem Tag.</text>
+      <text x="15" y="69" font-family="-apple-system,Arial,sans-serif" font-size="6.5" font-weight="700" letter-spacing="1" fill="#8D8072">DEIN RAUM</text>
+      <rect x="8" y="80" width="116" height="29" rx="7" fill="#E5D2C4"/>
+      <rect x="8" y="85" width="2" height="19" rx="1" fill="#914633"/>
+      <text x="23" y="98" font-family="-apple-system,Arial,sans-serif" font-size="9" font-weight="600" fill="#29241F">▢  Neuer Eintrag</text>
+      <text x="23" y="128" font-family="-apple-system,Arial,sans-serif" font-size="9" font-weight="500" fill="#29241F">♡  Lieblingsverse</text>
+      <rect x="12" y="345" width="108" height="24" rx="7" fill="#E6DFD3"/>
+      <text x="23" y="360" font-family="-apple-system,Arial,sans-serif" font-size="6.5" fill="#71675C">▣ Privat. Lokal. Nur deins.</text>
+
+      <text x="156" y="31" font-family="-apple-system,Arial,sans-serif" font-size="6.5" font-weight="700" letter-spacing="1.2" fill="#8D8072">MITTWOCH, 25. NOVEMBER</text>
+      <text x="155" y="70" font-family="Georgia,serif" font-size="28" font-weight="bold" fill="#29241F">Was bewegt dich gerade?</text>
+      <text x="156" y="94" font-family="Georgia,serif" font-size="10.5" fill="#71675C">Ein ehrlicher Satz genügt. Du musst nichts schön formulieren.</text>
+      <g font-family="-apple-system,Arial,sans-serif" font-size="7.5" fill="#71675C">
+        <rect x="156" y="111" width="48" height="21" rx="10.5" fill="#FCFAF6" stroke="#DED4C5"/>
+        <text x="180" y="125" text-anchor="middle">Angst</text>
+        <rect x="210" y="111" width="52" height="21" rx="10.5" fill="#FCFAF6" stroke="#DED4C5"/>
+        <text x="236" y="125" text-anchor="middle">Trauer</text>
+        <rect x="268" y="111" width="70" height="21" rx="10.5" fill="#FCFAF6" stroke="#DED4C5"/>
+        <text x="303" y="125" text-anchor="middle">Dankbarkeit</text>
+        <rect x="344" y="111" width="72" height="21" rx="10.5" fill="#FCFAF6" stroke="#DED4C5"/>
+        <text x="380" y="125" text-anchor="middle">Entscheidung</text>
+      </g>
+      <rect x="155" y="146" width="372" height="201" rx="14" fill="#FCFAF6" stroke="#DED4C5"/>
+      <text x="174" y="177" font-family="Georgia,serif" font-size="13" fill="#A39685">Schreib, was dir auf dem Herzen liegt …</text>
+      <path d="M174 294H508" stroke="#DED4C5"/>
+      <text x="174" y="323" font-family="-apple-system,Arial,sans-serif" font-size="7" fill="#A39685">⌘ Zum Senden ↩</text>
+      <rect x="414" y="306" width="96" height="29" rx="8" fill="#914633"/>
+      <text x="462" y="325" text-anchor="middle" font-family="-apple-system,Arial,sans-serif" font-size="8.5" font-weight="650" fill="#FFF9F2">Verse finden →</text>
+      <text x="156" y="367" font-family="-apple-system,Arial,sans-serif" font-size="6.5" fill="#A39685">♢ Deine Worte bleiben auf diesem Mac – ohne Cloud und ohne Konto.</text>
+      <rect width="550" height="382" fill="url(#glass)"/>
+    </g>
+
+    <path d="M1067 687L1663 771L1790 858L942 754Z" fill="url(#metal)" stroke="#E9E3DB" stroke-opacity=".35" stroke-width="2"/>
+    <path d="M1111 713L1607 782L1682 826L1041 750Z" fill="#262422" opacity=".92"/>
+    <path d="M1111 713L1607 782L1682 826L1041 750Z" fill="url(#keys)" opacity=".8"/>
+    <path d="M1238 774L1457 804L1501 831L1210 794Z" fill="#B7B1A9" stroke="#77736E" stroke-width="1.5"/>
+    <path d="M942 754L1790 858V879L942 776Z" fill="url(#metalEdge)"/>
+    <path d="M1253 798L1501 831Q1487 843 1463 840L1281 817Q1262 814 1253 798Z" fill="#4D4945" opacity=".8"/>
+    <path d="M1067 687L1663 771" stroke="#F7F1E9" stroke-opacity=".55" stroke-width="3"/>
+  </g>
+
+  <g transform="translate(1000 118) rotate(-9)" filter="url(#softShadow)">
+    <rect width="166" height="106" rx="24" fill="#F7F1E8" fill-opacity=".09" stroke="#F7E8DC" stroke-opacity=".22"/>
+    <text x="83" y="61" text-anchor="middle" font-family="Menlo,monospace" font-size="40" font-weight="600" fill="#E9A080">&lt;/&gt;</text>
+    <text x="83" y="86" text-anchor="middle" font-family="-apple-system,Arial,sans-serif" font-size="12" letter-spacing="2" fill="#C7B7AB">BUILD GOOD</text>
+  </g>
+
+  <g transform="translate(1690 172) rotate(10)" filter="url(#softShadow)">
+    <rect width="108" height="108" rx="28" fill="#A65740" fill-opacity=".3" stroke="#F3B496" stroke-opacity=".35"/>
+    <path d="M54 25v57M32 47h44" stroke="#F2B294" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <g fill="#E7A080">
+    <circle cx="927" cy="302" r="4" opacity=".6"/>
+    <circle cx="1811" cy="452" r="4" opacity=".5"/>
+    <circle cx="988" cy="568" r="3" opacity=".35"/>
+  </g>
+  <g stroke="#E7A080" stroke-width="2" stroke-linecap="round" opacity=".5">
+    <path d="M927 275v14m-7-7h14"/>
+    <path d="M1811 425v14m-7-7h14"/>
+    <path d="M1748 656v12m-6-6h12"/>
+  </g>
+</svg>
