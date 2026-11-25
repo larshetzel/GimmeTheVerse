@@ -3,4 +3,8 @@ build/
 .swiftpm/
 .DS_Store
 tools/schlachter.json
+tools/hoffnung-fuer-alle.json
+Resources/verses-hfa.json
+Resources/embeddings-hfa.f16
+Resources/prior-hfa.f32
 __pycache__/

@@ -7,6 +7,10 @@ Liest tools/schlachter.json (Schlachter 1951, getbible.net) und tools/themes.jso
   Resources/prior.f32        – N float32: wie sehr ein Vers nach Zusage/Trost/Gebet/Lob klingt (z-normalisiert)
   Resources/themes.json      – [{"name", "passages": [[start, end], ...]}] mit Vers-Indizes
 
+Optional wird eine selbst lizenzierte Hoffnung-für-alle-Datei unter tools/hoffnung-fuer-alle.json
+im getBible-Format eingelesen. Ihre Texte und Embeddings werden nur lokal abgelegt und nicht versioniert.
+Fehlende Einzelverse fallen auf Schlachter 1951 zurück, damit die Stellenindizes identisch bleiben.
+
 Die Embeddings werden nur neu berechnet, wenn sie fehlen oder --reembed angegeben ist (~10 min).
 Aufruf:  uv run --with numpy tools/build_index.py [--reembed]
 """
@@ -21,6 +25,7 @@ import numpy as np
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "tools" / "schlachter.json"
+HFA_SRC = ROOT / "tools" / "hoffnung-fuer-alle.json"
 THEMES = ROOT / "tools" / "themes.json"
 OUT = ROOT / "Resources"
 OLLAMA = "http://localhost:11434/api/embed"
@@ -63,11 +68,7 @@ def embed(inputs):
     return v / np.linalg.norm(v, axis=1, keepdims=True)
 
 
-def load_verses():
-    if not SRC.exists():
-        print("Lade Schlachter 1951 von getbible.net …", file=sys.stderr)
-        urllib.request.urlretrieve("https://api.getbible.net/v2/schlachter.json", SRC)
-    data = json.loads(SRC.read_text())
+def parse_getbible(data):
     assert len(data["books"]) == 66
     verses = []
     for bi, book in enumerate(data["books"]):
@@ -77,8 +78,25 @@ def load_verses():
     return verses
 
 
-def build_embeddings(verses, force):
-    path = OUT / "embeddings.f16"
+def load_verses():
+    if not SRC.exists():
+        print("Lade Schlachter 1951 von getbible.net …", file=sys.stderr)
+        urllib.request.urlretrieve("https://api.getbible.net/v2/schlachter.json", SRC)
+    return parse_getbible(json.loads(SRC.read_text()))
+
+
+def load_hfa(canonical):
+    if not HFA_SRC.exists():
+        return None
+    translated = {(b, c, v): t for b, c, v, t in parse_getbible(json.loads(HFA_SRC.read_text()))}
+    missing = sum((b, c, v) not in translated for b, c, v, _ in canonical)
+    verses = [[b, c, v, translated.get((b, c, v), fallback)] for b, c, v, fallback in canonical]
+    print(f"Hoffnung für alle: {len(canonical) - missing} Stellen, {missing} Schlachter-Fallbacks", file=sys.stderr)
+    return verses
+
+
+def build_embeddings(verses, force, filename="embeddings.f16"):
+    path = OUT / filename
     if path.exists() and not force and path.stat().st_size == len(verses) * 768 * 2:
         return np.fromfile(path, dtype="<f2").astype(np.float32).reshape(len(verses), 768)
     docs = [f"title: {BOOKS_DE[b]} {c},{v} | text: {t}" for b, c, v, t in verses]
@@ -94,11 +112,11 @@ def build_embeddings(verses, force):
     return vecs
 
 
-def build_prior(vecs):
+def build_prior(vecs, filename="prior.f32"):
     anchors = embed([f"task: search result | query: {a}" for a in PRIOR_ANCHORS])
     prior = (vecs @ anchors.T).max(1)
     prior = (prior - prior.mean()) / prior.std()
-    prior.astype("<f4").tofile(OUT / "prior.f32")
+    prior.astype("<f4").tofile(OUT / filename)
 
 
 def build_themes(verses):
@@ -127,6 +145,11 @@ def main():
     (OUT / "verses.json").write_text(json.dumps(verses, ensure_ascii=False, separators=(",", ":")))
     vecs = build_embeddings(verses, force="--reembed" in sys.argv)
     build_prior(vecs)
+    hfa = load_hfa(verses)
+    if hfa is not None:
+        (OUT / "verses-hfa.json").write_text(json.dumps(hfa, ensure_ascii=False, separators=(",", ":")))
+        hfa_vecs = build_embeddings(hfa, force="--reembed" in sys.argv, filename="embeddings-hfa.f16")
+        build_prior(hfa_vecs, filename="prior-hfa.f32")
     themes = build_themes(verses)
     print(f"{len(verses)} Verse, {len(themes)} Lebenslagen, {sum(len(t['passages']) for t in themes)} Stellen")
 

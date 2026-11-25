@@ -220,7 +220,7 @@ struct VerseView: View {
     /// Umgebende Verse in Grau, der gewählte Vers hervorgehoben.
     private var contextText: some View {
         let parts = bible.context(of: passage).map { i -> Text in
-            let v = bible.verses[i]
+            let v = bible.verse(at: i)
             let num = Text("\(v.verse) ").font(.system(size: 11, weight: .semibold)).baselineOffset(5)
             let body = Text(v.text + " ")
             return (num + body).foregroundColor(passage.indices.contains(i) ? Theme.ink : Theme.inkFaint)
@@ -234,7 +234,7 @@ struct VerseView: View {
 
     private func copy() {
         NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString("„\(bible.text(passage))“ – \(bible.reference(passage)) (Schlachter 1951)", forType: .string)
+        NSPasteboard.general.setString("„\(bible.text(passage))“ – \(bible.reference(passage)) (\(bible.translationName))", forType: .string)
     }
 }
 

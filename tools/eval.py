@@ -88,7 +88,7 @@ def text(p):
     return " ".join(VERSES[i][3] for i in range(p[0], p[1] + 1))
 
 
-def preview(p, words=10):
+def preview(p, words=28):
     w = text(p).split()
     return " ".join(w) if len(w) <= words else " ".join(w[:words]) + " …"
 
@@ -106,21 +106,37 @@ def semantic(queries, k=45, per_query=60, w=0.01):
 
 
 def pool(names, sem, limit=45):
-    out, covered = [], set()
-    for name in names:
-        for th in THEMES:
-            if th["name"] == name:
-                for s, e in th["passages"]:
-                    if s not in covered:
-                        out.append((s, e))
-                        covered.update(range(s, e + 1))
+    groups = [th["passages"] for name in names for th in THEMES if th["name"] == name]
+    curated, known = [], set()
+    position = 0
+    while True:
+        added = False
+        for group in groups:
+            if position < len(group):
+                s, e = group[position]
+                if s not in known:
+                    curated.append((s, e))
+                    known.update(range(s, e + 1))
+                    added = True
+        if not added and all(position >= len(group) for group in groups):
+            break
+        position += 1
+
+    out = curated[:limit // 2]
+    covered = {i for s, e in out for i in range(s, e + 1)}
     for i in sem:
         if len(out) >= limit:
             break
         if i not in covered:
             out.append((i, i))
             covered.add(i)
-    return out[:limit]
+    for s, e in curated:
+        if len(out) >= limit:
+            break
+        if s not in covered:
+            out.append((s, e))
+            covered.update(range(s, e + 1))
+    return out
 
 
 def run(model, case):

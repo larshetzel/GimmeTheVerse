@@ -54,7 +54,9 @@ struct FavoritesView: View {
 }
 
 struct SettingsView: View {
+    @Environment(Engine.self) private var engine
     @AppStorage(Defaults.modelKey) private var model = Defaults.model
+    @AppStorage(Defaults.translationKey) private var translation = BibleTranslation.schlachter.rawValue
     @State private var models: [String] = []
     @State private var status = "Prüfe Ollama …"
 
@@ -64,7 +66,11 @@ struct SettingsView: View {
                 ForEach(Array(Set(models + [model])).sorted(), id: \.self) { Text($0).tag($0) }
             }
             LabeledContent("Suche", value: Ollama.embedModel)
-            LabeledContent("Übersetzung", value: "Schlachter 1951")
+            Picker("Übersetzung", selection: $translation) {
+                ForEach(engine.bible.availableTranslations) { translation in
+                    Text(translation.displayName).tag(translation.rawValue)
+                }
+            }
             LabeledContent("Ollama", value: status)
         }
         .formStyle(.grouped)

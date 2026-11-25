@@ -40,8 +40,14 @@ struct GimmeTheVerseApp: App {
         }
 
         Settings {
-            SettingsView()
-                .frame(width: 440)
+            Group {
+                if case let .ready(engine) = state {
+                    SettingsView().environment(engine)
+                } else {
+                    Text("Die Bibeldaten konnten nicht geladen werden.")
+                }
+            }
+            .frame(width: 440)
         }
     }
 }

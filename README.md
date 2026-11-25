@@ -1,14 +1,14 @@
 # GimmeTheVerse
 
-Kleine, lokale macOS-App: Du schreibst auf, was dich bewegt, also Sorgen, Ängste, Dankbarkeit oder eine Entscheidung, und bekommst passende Bibelverse aus der **Schlachter 1951** mit einem kurzen, seelsorgerlichen Zuspruch. Alles läuft lokal über Ollama, kein Text verlässt den Mac.
+Kleine, lokale macOS-App: Du schreibst auf, was dich bewegt, also Sorgen, Ängste, Dankbarkeit oder eine Entscheidung, und bekommst passende Bibelverse aus der **Schlachter 1951** mit einem kurzen, seelsorgerlichen Zuspruch. Optional kann eine selbst lizenzierte **Hoffnung für alle** eingebunden werden. Alles läuft lokal über Ollama, kein Text verlässt den Mac.
 
 <img src="docs/icon.png" width="96">
 
 ## So funktioniert es
 
 1. **Analyse** (LLM, Standard `gemma4:12b`): ordnet dein Anliegen 1–3 von 48 kuratierten **Lebenslagen** zu (`tools/themes.json`, z. B. „Trauer um einen Menschen“ oder „Einsamkeit“). Dazu formuliert es Suchsätze, eine Überschrift und eine Krisen-Einschätzung.
-2. **Kandidaten:** zuerst die bewährten Stellen dieser Lebenslagen, dann semantische Treffer aus allen 31.170 Versen. Dafür nutzt die App `embeddinggemma-2`, Reciprocal Rank Fusion über die Suchsätze und einen „Trost-Prior“, der Zusagen, Gebete und Lob leicht bevorzugt.
-3. **Auswahl** (LLM): wählt 4 Stellen aus maximal 32 Kandidaten. Im Prompt stehen nur Stellenangabe und Anfang, denn der Prefill ist der Engpass.
+2. **Kandidaten:** je zur Hälfte bewährte Stellen dieser Lebenslagen und semantische Treffer aus allen 31.170 Versen. Dafür nutzt die App `embeddinggemma-2`, Reciprocal Rank Fusion über die Suchsätze und einen „Trost-Prior“, der Zusagen, Gebete und Lob leicht bevorzugt.
+3. **Auswahl** (LLM): wählt 4 Stellen aus maximal 32 Kandidaten. Im Prompt stehen Stellenangabe und die ersten 28 Wörter, damit die Auswahl nicht anhand eines abgeschnittenen Satzbeginns erfolgt.
 4. **Zuspruch** (LLM, gestreamt): 3–5 Sätze in der Du-Form, warm und seelsorgerlich.
 
 Danach kannst du unter dem Zuspruch **weiterreden**. Der Chat kennt dein Anliegen, die Verse und den Zuspruch. Nennt das Modell eine neue Stelle als `[[Psalm 23,4]]`, zeigt die App den Schlachter-Text wortgetreu in der Antwort an, nicht auflösbare Stellen fallen weg. Das Gespräch wird mit dem Eintrag gespeichert.
@@ -40,6 +40,8 @@ Index neu bauen, z. B. nach einem Wechsel des Embedding-Modells (dauert ein paar
 uv run --with numpy tools/build_index.py
 ```
 
+Optional **Hoffnung für alle**: Lege eine selbst lizenzierte Datei im getBible-Format als `tools/hoffnung-fuer-alle.json` ab und führe `tools/build_index.py` erneut aus. Die Datei und ihre abgeleiteten Ressourcen sind von Git ausgeschlossen und dürfen nicht ohne Genehmigung verbreitet werden. Fehlende Einzelverse verwenden zur Beibehaltung der Stellenindizes Schlachter 1951. Danach lässt sich die Übersetzung unter *Einstellungen* wählen; Anzeige und semantische Suche verwenden dann dieselbe Textfassung.
+
 Pipeline testen bzw. Modelle vergleichen (liest die Prompts direkt aus `Engine.swift`):
 
 ```sh
@@ -58,6 +60,7 @@ Neue Lebenslage oder Stelle: `tools/themes.json` bearbeiten, dann `tools/build_i
 
 - Verlauf und Lieblingsverse: `~/Library/Application Support/GimmeTheVerse/journal.json`
 - Bibeltext: Schlachter 1951 über [getbible.net](https://getbible.net). Laut Quelle *„Copyrighted; Free non-commercial distribution“*, deshalb ist die App nur für den privaten, nicht-kommerziellen Gebrauch gedacht.
+- Hoffnung für alle: nicht enthalten; nur als selbst lizenzierter lokaler Import unterstützt. Die Übersetzung ist urheberrechtlich geschützt und nicht public domain.
 
 ## Aufbau
 

@@ -14,6 +14,9 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp .build/release/GimmeTheVerse "$APP/Contents/MacOS/"
 cp Resources/{verses.json,books.json,themes.json,embeddings.f16,prior.f32} "$APP/Contents/Resources/"
+for f in verses-hfa.json embeddings-hfa.f16 prior-hfa.f32; do
+  [[ -f Resources/$f ]] && cp "Resources/$f" "$APP/Contents/Resources/"
+done
 [[ -f Resources/AppIcon.icns ]] && cp Resources/AppIcon.icns "$APP/Contents/Resources/"
 
 VERSION=$(git describe --tags --always 2>/dev/null || echo 0.1)

@@ -4,7 +4,11 @@ import Observation
 enum Defaults {
     static let modelKey = "chatModel"
     static let model = "gemma4:12b"
+    static let translationKey = "bibleTranslation"
     static var chatModel: String { UserDefaults.standard.string(forKey: modelKey) ?? model }
+    static var translation: BibleTranslation {
+        BibleTranslation(rawValue: UserDefaults.standard.string(forKey: translationKey) ?? "") ?? .schlachter
+    }
 }
 
 /// Ablauf:
@@ -126,7 +130,7 @@ final class Engine {
                 Pick.self, model: model,
                 system: Prompts.selectSystem,
                 user: Prompts.selectUser(text: text, candidates: candidates.enumerated().map {
-                    "[\($0.offset + 1)] \(bible.reference($0.element)): \(bible.preview($0.element, words: 10))"
+                    "[\($0.offset + 1)] \(bible.reference($0.element)): \(bible.preview($0.element, words: 28))"
                 }),
                 schema: Pick.schema, example: Pick.example
             )
@@ -226,7 +230,7 @@ enum Prompts {
 
     static let selectSystem = """
     Du hilfst dabei, zu dem Anliegen eines Menschen passende Bibelstellen auszuwählen.
-    Du bekommst das Anliegen und eine nummerierte Liste von Kandidaten (Schlachter 1951).
+    Du bekommst das Anliegen und eine nummerierte Liste von Kandidaten in der eingestellten Bibelübersetzung.
 
     Wähle die 4 Stellen aus, die diesem Menschen in seiner konkreten Lage am meisten Trost, Hoffnung, Kraft oder Orientierung geben – oder, wenn er sich freut, die seine Freude und seinen Dank aufnehmen.
     - Bevorzuge Stellen, die für sich allein verständlich sind und den Leser direkt ansprechen oder eine Zusage Gottes enthalten.
@@ -249,6 +253,7 @@ enum Prompts {
         - 3 bis 5 Sätze in einem einzigen Absatz, in heutiger, schlichter Sprache. Kurz ist besser als lang.
         - Nimm ernst, was er fühlt, und beziehe dich konkret auf seine Lage. Wenn er sich freut, freu dich mit ihm, statt zu trösten.
         - Greif ein oder zwei der Stellen auf und nenne sie mit Stellenangabe (z. B. "in Psalm 23,4"). Zitiere höchstens wenige Worte daraus, wortgetreu.
+        - Nenne ausschließlich Stellenangaben aus der obigen Auswahl und führe keine neuen Bibelstellen ein.
         - Der erste Satz beginnt nicht mit "Es ist", "Ich verstehe" oder "Ich kann verstehen" – fang direkt bei ihm und seiner Lage an.
         - Keine Floskeln, keine Predigt, keine Ratschläge von oben herab, keine Diagnosen.
         - Keine Überschrift, keine Anrede wie "Lieber …", keine Aufzählung, keine Emojis, kein Gruß am Ende.
@@ -264,7 +269,7 @@ enum Prompts {
 
     static func chatSystem(crisis: Bool) -> String {
         var s = """
-        Du bist ein einfühlsamer, erfahrener Seelsorger. Ein Mensch hat dir anvertraut, was ihn bewegt; er hat dazu Bibelstellen (Schlachter 1951) und einen ersten Zuspruch bekommen. Jetzt führt ihr ein Gespräch.
+        Du bist ein einfühlsamer, erfahrener Seelsorger. Ein Mensch hat dir anvertraut, was ihn bewegt; er hat dazu Bibelstellen in der eingestellten Übersetzung und einen ersten Zuspruch bekommen. Jetzt führt ihr ein Gespräch.
 
         So antwortest du:
         - Auf Deutsch, in der Du-Form, warm, ehrlich und in heutiger, schlichter Sprache.
