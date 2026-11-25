@@ -22,7 +22,7 @@ struct EntryView: View {
                     if entry.passages.isEmpty {
                         if entry.isWorking { Working(status: entry.status) }
                     } else {
-                        VStack(alignment: .leading, spacing: 30) {
+                        VStack(alignment: .leading, spacing: 16) {
                             ForEach(entry.passages, id: \.self) { VerseView(passage: $0) }
                         }
                         .transition(.opacity)
@@ -36,10 +36,10 @@ struct EntryView: View {
                         failure(entry)
                     }
                 }
-                .padding(.horizontal, 56)
-                .padding(.top, 44)
+                .padding(.horizontal, 48)
+                .padding(.top, 48)
                 .padding(.bottom, 56)
-                .frame(maxWidth: 720, alignment: .leading)
+                .frame(maxWidth: 780, alignment: .leading)
                 .frame(maxWidth: .infinity)
                 .animation(.easeOut(duration: 0.35), value: entry.passages)
                 Color.clear.frame(height: 1).id(Self.bottom)
@@ -71,48 +71,69 @@ struct EntryView: View {
                         Button("Löschen", role: .destructive, action: onDelete)
                     }
             }
-            .padding(.bottom, 18)
+            .padding(.bottom, 14)
 
             Text(entry.theme.isEmpty ? " " : entry.theme)
-                .font(Theme.serif(30))
+                .font(Theme.serif(36, .medium))
                 .foregroundStyle(Theme.ink)
-                .padding(.bottom, 14)
+                .padding(.bottom, 18)
 
-            Text(entry.text)
-                .font(Theme.serif(15))
-                .italic()
-                .foregroundStyle(Theme.inkSoft)
-                .lineSpacing(3)
-                .textSelection(.enabled)
-                .padding(.leading, 14)
-                .overlay(alignment: .leading) {
-                    Rectangle().fill(Theme.rule).frame(width: 2)
-                }
-                .padding(.bottom, 30)
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "quote.opening")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Theme.accent)
+                    .padding(.top, 2)
+                Text(entry.text)
+                    .font(Theme.serif(15))
+                    .italic()
+                    .foregroundStyle(Theme.inkSoft)
+                    .lineSpacing(4)
+                    .textSelection(.enabled)
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 15)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.surface.opacity(0.62), in: RoundedRectangle(cornerRadius: 12))
+            .padding(.bottom, 28)
 
-            Rectangle().fill(Theme.rule).frame(height: 1)
-                .padding(.bottom, 30)
+            HStack(spacing: 8) {
+                Image(systemName: "book")
+                    .font(.system(size: 11, weight: .semibold))
+                Rubric("Verse für dich", color: Theme.accent)
+            }
+            .padding(.bottom, 14)
         }
     }
 
     @ViewBuilder
     private func comfort(_ entry: Entry) -> some View {
         if entry.status == .writing || !entry.zuspruch.isEmpty {
-            VStack(alignment: .leading, spacing: 12) {
-                Rectangle().fill(Theme.rule).frame(height: 1).padding(.bottom, 18)
-                Rubric("Zuspruch", color: Theme.accent)
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 9) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Theme.accent)
+                    Rubric("Ein Zuspruch für dich", color: Theme.accent)
+                }
                 if entry.zuspruch.isEmpty {
                     Working(status: .writing)
                 } else {
                     Text(entry.zuspruch)
-                        .font(Theme.serif(17))
+                        .font(Theme.serif(18))
                         .foregroundStyle(Theme.ink)
                         .lineSpacing(6)
                         .textSelection(.enabled)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .padding(.top, 36)
+            .padding(22)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.accentSoft.opacity(0.52), in: RoundedRectangle(cornerRadius: 16))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Theme.accent.opacity(0.12), lineWidth: 1)
+            }
+            .padding(.top, 28)
         }
     }
 
@@ -137,6 +158,7 @@ struct VerseView: View {
     @Environment(Journal.self) private var journal
     let passage: Passage
     var size: CGFloat = 20
+    var card = true
     @State private var hovering = false
     @State private var showContext = false
 
@@ -162,7 +184,7 @@ struct VerseView: View {
                     .help(favorite ? "Aus Lieblingsversen entfernen" : "Zu Lieblingsversen")
                 }
                 .buttonStyle(IconButtonStyle())
-                .opacity(hovering || favorite || showContext ? 1 : 0)
+                .opacity(hovering || favorite || showContext ? 1 : 0.6)
             }
 
             if showContext {
@@ -174,6 +196,20 @@ struct VerseView: View {
                     .lineSpacing(6)
                     .textSelection(.enabled)
                     .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(card ? 20 : 0)
+        .background {
+            if card {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Theme.surface.opacity(0.88))
+                    .shadow(color: .black.opacity(0.035), radius: 12, y: 5)
+            }
+        }
+        .overlay {
+            if card {
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(hovering ? Theme.accent.opacity(0.22) : Theme.rule.opacity(0.8), lineWidth: 1)
             }
         }
         .contentShape(Rectangle())
@@ -219,13 +255,18 @@ struct Working: View {
     }
 
     var body: some View {
-        Text(label)
-            .font(Theme.serif(16))
-            .italic()
-            .foregroundStyle(Theme.inkSoft)
-            .opacity(phase ? 0.35 : 1)
-            .animation(.easeInOut(duration: 1.1).repeatForever(), value: phase)
-            .onAppear { phase = true }
+        HStack(spacing: 10) {
+            ProgressView()
+                .controlSize(.small)
+                .tint(Theme.accent)
+            Text(label)
+                .font(Theme.serif(16))
+                .italic()
+                .foregroundStyle(Theme.inkSoft)
+        }
+        .opacity(phase ? 0.55 : 1)
+        .animation(.easeInOut(duration: 1.1).repeatForever(), value: phase)
+        .onAppear { phase = true }
     }
 }
 

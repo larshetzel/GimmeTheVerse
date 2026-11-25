@@ -19,11 +19,11 @@ struct GimmeTheVerseApp: App {
                     LoadErrorView(message: message)
                 }
             }
-            .frame(minWidth: 640, minHeight: 520)
+            .frame(minWidth: 760, minHeight: 640)
             .background(Theme.paper)
         }
         .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 860, height: 680)
+        .defaultSize(width: 1040, height: 740)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("Neuer Eintrag") {

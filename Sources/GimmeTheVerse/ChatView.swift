@@ -100,7 +100,7 @@ private struct ChatBubble: View {
                 ForEach(message.passages, id: \.self) { passage in
                     VStack(alignment: .leading, spacing: 10) {
                         Rectangle().fill(Theme.rule).frame(height: 1)
-                        VerseView(passage: passage, size: 17)
+                        VerseView(passage: passage, size: 17, card: false)
                     }
                 }
             }

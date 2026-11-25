@@ -21,13 +21,13 @@ struct ContentView: View {
         HStack(spacing: 0) {
             if showSidebar {
                 Sidebar(route: $route)
-                    .frame(width: 236)
+                    .frame(width: 250)
                     .transition(.move(edge: .leading).combined(with: .opacity))
-                Rectangle().fill(Theme.rule).frame(width: 1)
+                Rectangle().fill(Theme.rule.opacity(0.75)).frame(width: 1)
             }
             detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Theme.paper)
+                .background(PaperBackground())
         }
         .ignoresSafeArea()
         .onReceive(NotificationCenter.default.publisher(for: .newEntry)) { _ in route = .compose }
@@ -65,35 +65,49 @@ struct Sidebar: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Platz für die Ampel-Knöpfe des Fensters
-            Color.clear.frame(height: 44)
+            Color.clear.frame(height: 52)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text("GimmeTheVerse")
-                    .font(Theme.serif(17, .medium))
-                    .foregroundStyle(Theme.ink)
-                Text("Die Bibel zu deinem Tag.")
-                    .font(Theme.serif(12.5))
-                    .italic()
-                    .foregroundStyle(Theme.inkSoft)
+            HStack(spacing: 11) {
+                BrandMark()
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("GimmeTheVerse")
+                        .font(Theme.serif(17, .semibold))
+                        .foregroundStyle(Theme.ink)
+                    Text("Die Bibel zu deinem Tag.")
+                        .font(.system(size: 10.5))
+                        .foregroundStyle(Theme.inkSoft)
+                }
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 18)
+            .padding(.horizontal, 18)
+            .padding(.bottom, 30)
 
-            SidebarRow(selected: route == .compose, action: { route = .compose }) {
-                rowLabel("Neuer Eintrag", systemImage: "square.and.pencil")
-            }
-            SidebarRow(selected: route == .favorites, action: { route = .favorites }) {
-                rowLabel("Lieblingsverse", systemImage: "heart", count: journal.favorites.count)
+            Rubric("Dein Raum")
+                .padding(.horizontal, 20)
+                .padding(.bottom, 8)
+
+            VStack(spacing: 3) {
+                SidebarRow(selected: route == .compose, action: { route = .compose }) {
+                    rowLabel("Neuer Eintrag", systemImage: "square.and.pencil")
+                }
+                SidebarRow(selected: route == .favorites, action: { route = .favorites }) {
+                    rowLabel("Lieblingsverse", systemImage: "heart", count: journal.favorites.count)
+                }
             }
 
             if !journal.entries.isEmpty {
-                Rubric("Verlauf")
-                    .padding(.horizontal, 20)
-                    .padding(.top, 26)
-                    .padding(.bottom, 8)
+                HStack {
+                    Rubric("Verlauf")
+                    Spacer()
+                    Text("\(journal.entries.count)")
+                        .font(.system(size: 10, weight: .medium).monospacedDigit())
+                        .foregroundStyle(Theme.inkFaint)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 28)
+                .padding(.bottom, 8)
 
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0) {
+                    LazyVStack(alignment: .leading, spacing: 3) {
                         ForEach(journal.entries) { entry in
                             SidebarRow(selected: route == .entry(entry.id), action: { route = .entry(entry.id) }) {
                                 EntryRow(entry: entry)
@@ -112,14 +126,19 @@ struct Sidebar: View {
             }
             Spacer(minLength: 0)
 
-            HStack(spacing: 6) {
-                Image(systemName: "lock")
-                    .font(.system(size: 9.5, weight: .medium))
-                Text("Bleibt auf diesem Mac")
-                    .font(.system(size: 10.5))
+            HStack(spacing: 8) {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(Theme.accent)
+                Text("Privat. Lokal. Nur deins.")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Theme.inkSoft)
             }
-            .foregroundStyle(Theme.inkFaint)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.surface.opacity(0.45), in: RoundedRectangle(cornerRadius: 10))
+            .padding(.horizontal, 14)
             .padding(.top, 10)
             .padding(.bottom, 16)
             .help("Alles läuft lokal über Ollama. Deine Einträge werden nur in ~/Library/Application Support/GimmeTheVerse gespeichert.")
@@ -129,19 +148,22 @@ struct Sidebar: View {
     }
 
     private func rowLabel(_ title: String, systemImage: String, count: Int = 0) -> some View {
-        HStack(spacing: 9) {
+        HStack(spacing: 10) {
             Image(systemName: systemImage)
-                .font(.system(size: 12))
+                .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(Theme.accent)
-                .frame(width: 16)
+                .frame(width: 17)
             Text(title)
-                .font(Theme.serif(14))
+                .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(Theme.ink)
             Spacer()
             if count > 0 {
                 Text("\(count)")
-                    .font(.system(size: 11).monospacedDigit())
-                    .foregroundStyle(Theme.inkFaint)
+                    .font(.system(size: 10, weight: .semibold).monospacedDigit())
+                    .foregroundStyle(Theme.accent)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(Theme.accentSoft, in: Capsule())
             }
         }
     }
@@ -157,15 +179,18 @@ private struct SidebarRow<Label: View>: View {
         Button(action: action) {
             label
                 .padding(.horizontal, 12)
-                .padding(.vertical, 7)
+                .padding(.vertical, 9)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background {
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(selected ? Theme.rule.opacity(0.75) : hovering ? Theme.rule.opacity(0.35) : .clear)
+                    RoundedRectangle(cornerRadius: 9)
+                        .fill(selected ? Theme.accentSoft.opacity(0.85) : hovering ? Theme.rule.opacity(0.4) : .clear)
                 }
                 .overlay(alignment: .leading) {
                     if selected {
-                        Rectangle().fill(Theme.accent).frame(width: 2).padding(.vertical, 6)
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Theme.accent)
+                            .frame(width: 3)
+                            .padding(.vertical, 9)
                     }
                 }
                 .contentShape(Rectangle())
@@ -180,13 +205,13 @@ private struct EntryRow: View {
     let entry: Entry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 3) {
             Text(entry.title)
-                .font(Theme.serif(14))
+                .font(.system(size: 12.5, weight: .medium))
                 .foregroundStyle(Theme.ink)
                 .lineLimit(1)
             Text(entry.date, format: .relative(presentation: .named))
-                .font(.system(size: 11))
+                .font(.system(size: 10.5))
                 .foregroundStyle(Theme.inkFaint)
         }
     }
