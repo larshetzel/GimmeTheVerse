@@ -2,17 +2,15 @@
 
 <img src="docs/icon.png" width="96">
 
-A private, German-language macOS app that connects what is on your mind with relevant Bible verses and a short, pastoral encouragement. Write about anxiety, grief, gratitude, or a decision, then continue the conversation. Everything runs locally through Ollama—no account, no cloud processing.
+A private macOS app that connects what is on your mind with relevant Bible verses and a short, pastoral encouragement. Write about anxiety, grief, gratitude, or a decision, then continue the conversation. Everything runs locally through Google Gemma 4 —no account, no cloud processing.
 
 ## Highlights
-
 - 48 curated life situations combined with semantic search across 31,170 verses
 - Verse text always comes directly from the local database, never from the language model
 - Conversation history and favorite verses stored only on your Mac
 - Crisis detection with contact information for Telefonseelsorge and emergency services
 
 ## Models
-
 | Purpose | Default model |
 |---|---|
 | Analysis, verse selection, encouragement, and chat | `gemma4:12b` |
