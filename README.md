@@ -69,6 +69,10 @@ Journal and favorites: `~/Library/Application Support/GimmeTheVerse/journal.json
 
 Schlachter 1951 text comes from [getBible.net](https://getbible.net). Its source states “Copyrighted; Free non-commercial distribution”; the app is therefore intended for private, non-commercial use.
 
+## Open source
+
+The original source code is available under the [MIT License](LICENSE). Bible texts, translations, and third-party assets are excluded and retain their respective licenses. In particular, Hoffnung für alle must not be committed or distributed without permission. Personal journals, API keys, and other private data must never be included in contributions.
+
 ## Contributing
 
-Issues, feedback, and pull requests are welcome—especially for SwiftUI, UX, retrieval quality, testing, accessibility, and pastoral sensitivity.
+Issues, feedback, and pull requests are welcome—especially for SwiftUI, UX, retrieval quality, testing, accessibility, and pastoral sensitivity. By contributing, you agree that your original code contributions are released under the MIT License.
